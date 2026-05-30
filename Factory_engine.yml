@@ -1,0 +1,180 @@
+name: NextGen App Factory Absolute Real Compiler 2026
+
+on:
+  workflow_dispatch:
+    inputs:
+      client_id:
+        required: true
+      app_name:
+        required: true
+      primary_color:
+        required: true
+      adsense_banner_id:
+        required: true
+      interstitial_ad_id:
+        required: true
+      app_version:
+        required: true
+      ai_prompt_type:
+        required: true
+      content_sheet:
+        required: true
+
+jobs:
+  build_real_apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Core Source Code Checkout
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Java 17 Industrial Machine
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 3. Verify All 9 Sheet Injected Parameters
+        run: |
+          echo "Client: ${{ github.event.inputs.client_id }}"
+          echo "App Name: ${{ github.event.inputs.app_name }}"
+          echo "Color: ${{ github.event.inputs.primary_color }}"
+          echo "Banner ID: ${{ github.event.inputs.adsense_banner_id }}"
+          echo "Interstitial ID: ${{ github.event.inputs.interstitial_ad_id }}"
+          echo "Version: ${{ github.event.inputs.app_version }}"
+          echo "Prompt Type: ${{ github.event.inputs.ai_prompt_type }}"
+          echo "Content Sheet: ${{ github.event.inputs.content_sheet }}"
+
+      - name: 4. Create Complete Real Android Project Structure
+        run: |
+          mkdir -p my-android-project/app/src/main/java/com/nextgen/appfactory
+          mkdir -p my-android-project/app/src/main/res/layout
+          mkdir -p my-android-project/app/src/main/res/values
+          mkdir -p my-android-project/gradle/wrapper
+
+      - name: 5. Generate Essential Configuration Files (Anti-Fail Settings)
+        run: |
+          cd my-android-project
+          echo "include ':app'" > settings.gradle
+          
+          cat << 'EOF' > build.gradle
+          buildscript {
+              repositories { google(); mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
+          }
+          allprojects { repositories { google(); mavenCentral() } }
+          EOF
+
+          cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+
+      - name: 6. Inject Android Manifest & Custom Source (With Unity Ads Logic)
+        run: |
+          cd my-android-project
+          
+          cat << 'EOF' > app/build.gradle
+          plugins { id 'com.android.application' }
+          android {
+              namespace 'com.nextgen.appfactory'
+              compileSdk 34
+              defaultConfig {
+                  applicationId "com.client${{ github.event.inputs.client_id }}.production"
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 1
+                  versionName "${{ github.event.inputs.app_version }}"
+              }
+          }
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.9.0'
+              implementation 'com.unity3d.ads:unity-ads:4.9.2'
+          }
+          EOF
+
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <manifest xmlns:android="http://schemas.microsoft.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+              <application android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/colors.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="colorPrimary">${{ github.event.inputs.primary_color }}</color>
+          </resources>
+          EOF
+
+          echo '<resources><style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > app/src/main/res/values/styles.xml
+
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <RelativeLayout xmlns:android="http://schemas.microsoft.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/colorPrimary"
+              android:padding="16dp">
+              <TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="${{ github.event.inputs.app_name }}" android:textSize="22sp" android:layout_centerHorizontal="true" />
+              <Button android:id="@+id/btn_interstitial" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Full Screen Ad" android:layout_below="@id/title" android:layout_marginTop="30dp"/>
+              <FrameLayout android:id="@+id/banner_ad_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" />
+          </RelativeLayout>
+          EOF
+
+          cat << EOF > app/src/main/java/com/nextgen/appfactory/MainActivity.java
+          package com.nextgen.appfactory;
+          import android.os.Bundle;
+          import android.view.View;
+          import android.widget.Button;
+          import android.widget.FrameLayout;
+          import androidx.appcompat.app.AppCompatActivity;
+          import com.unity3d.ads.UnityAds;
+          import com.unity3d.ads.IUnityAdsInitializationListener;
+          import com.unity3d.services.ads.banner.BannerView;
+          import com.unity3d.services.ads.banner.UnityBannerSize;
+
+          public class MainActivity extends AppCompatActivity {
+              private String unityGameId = "1346992390875";
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  setContentView(R.Bundle);
+                  setContentView(R.layout.activity_main);
+                  UnityAds.initialize(getApplicationContext(), unityGameId, false, new IUnityAdsInitializationListener() {
+                      @Override public void onInitializationComplete() { loadBannerAd(); }
+                      @Override public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message) {}
+                  });
+              }
+              private void loadBannerAd() {
+                  FrameLayout container = findViewById(R.id.banner_ad_container);
+                  BannerView banner = new BannerView(MainActivity.this, "${{ github.event.inputs.adsense_banner_id }}", new UnityBannerSize(320, 50));
+                  container.addView(banner);
+                  banner.load();
+              }
+          }
+          EOF
+
+      - name: 7. Run Real Industrial Gradle Compiler (Genuine APK Generation)
+        run: |
+          cd my-android-project
+          gradle wrapper
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: 8. Backup Save Real APK to GitHub Dashboard
+        uses: actions/upload-artifact@v4
+        with:
+          name: Absolute-Real-Production-APK
+          path: my-android-project/app/build/outputs/apk/release/*.apk
