@@ -1,45 +1,50 @@
-name: NextGen App Factory Absolute Real Compiler 2026
+name: NextGen 100-Percent Industrial Auto Pilot Engine 2026
 
 on:
   repository_dispatch:
     types: [trigger-factory]
 
 jobs:
-  build_real_apk:
+  industrial_build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Core Source Code Checkout
+      - name: 1. Clone Source Code Repository
         uses: actions/checkout@v4
 
-      - name: 2. Setup Java 17 Industrial Machine
+      - name: 2. Initialize Java 17 Production Environment
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: 3. Verify All 9 Sheet Injected Parameters
+      # 🔥 AUTOMATIC POLICY GENERATION & DEPLOYMENT JUGAD
+      - name: 3. Deploy Autonomous App Privacy Policy Webpage
         run: |
-          echo "Client: ${{ github.event.client_payload.client_id }}"
-          echo "App Name: ${{ github.event.client_payload.app_name }}"
-          echo "Color: ${{ github.event.client_payload.primary_color }}"
-          echo "Banner ID: ${{ github.event.client_payload.adsense_banner_id }}"
-          echo "Interstitial ID: ${{ github.event.client_payload.interstitial_ad_id }}"
-          echo "Version: ${{ github.event.client_payload.app_version }}"
-          echo "Prompt Type: ${{ github.event.client_payload.ai_prompt_type }}"
-          echo "Content Sheet: ${{ github.event.client_payload.content_sheet }}"
+          mkdir -p web-hosting/policies
+          cat << 'EOF' > web-hosting/policies/app_${{ github.event.client_payload.client_id }}_privacy.html
+          <html>
+          <head><title>Privacy Policy - ${{ github.event.client_payload.app_name }}</title></head>
+          <body style="font-family: sans-serif; padding: 30px; background: #f4f6f9; color: #333;">
+            <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
+              <h2>Privacy Policy for ${{ github.event.client_payload.app_name }}</h2>
+              <p>This application is part of the NextGen automated software network. We prioritize user safety and do not collect data.</p>
+              <p>Monetization verified via secure ad integrations.</p>
+            </div>
+          </body>
+          </html>
+          EOF
 
-      - name: 4. Create Complete Real Android Project Structure
+      - name: 4. Build Complete Android Core Infrastructure
         run: |
-          mkdir -p my-android-project/app/src/main/java/com/nextgen/appfactory
-          mkdir -p my-android-project/app/src/main/res/layout
-          mkdir -p my-android-project/app/src/main/res/values
-          mkdir -p my-android-project/gradle/wrapper
+          mkdir -p core/app/src/main/java/com/nextgen/appfactory
+          mkdir -p core/app/src/main/res/layout
+          mkdir -p core/app/src/main/res/values
+          mkdir -p core/gradle/wrapper
 
-      - name: 5. Generate Essential Configuration Files (Anti-Fail Settings)
+      - name: 5. Construct Engineering Gradle Configs
         run: |
-          cd my-android-project
+          cd core
           echo "include ':app'" > settings.gradle
-          
           cat << 'EOF' > build.gradle
           buildscript {
               repositories { google(); mavenCentral() }
@@ -47,7 +52,6 @@ jobs:
           }
           allprojects { repositories { google(); mavenCentral() } }
           EOF
-
           cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
@@ -56,17 +60,16 @@ jobs:
           zipStorePath=wrapper/dists
           EOF
 
-      - name: 6. Inject Android Manifest & Custom Source (With Unity Ads Logic)
+      - name: 6. Inject Full Architecture with Automated Ads Setup
         run: |
-          cd my-android-project
-          
+          cd core
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
           android {
               namespace 'com.nextgen.appfactory'
               compileSdk 34
               defaultConfig {
-                  applicationId "com.client${{ github.event.client_payload.client_id }}.production"
+                  applicationId "com.videodeno.autoapp${{ github.event.client_payload.client_id }}"
                   minSdk 24
                   targetSdk 34
                   versionCode 1
@@ -111,17 +114,14 @@ jobs:
               android:layout_height="match_parent"
               android:background="@color/colorPrimary"
               android:padding="16dp">
-              <TextView android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="${{ github.event.client_payload.app_name }}" android:textSize="22sp" android:layout_centerHorizontal="true" />
-              <Button android:id="@+id/btn_interstitial" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Full Screen Ad" android:layout_below="@id/title" android:layout_marginTop="30dp"/>
-              <FrameLayout android:id="@+id/banner_ad_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" />
+              <TextView android:id="@+id/app_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="${{ github.event.client_payload.app_name }}" android:textSize="24sp" android:layout_centerInParent="true" android:textColor="#FFFFFF"/>
+              <FrameLayout android:id="@+id/banner_ad_view" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" />
           </RelativeLayout>
           EOF
 
           cat << EOF > app/src/main/java/com/nextgen/appfactory/MainActivity.java
           package com.nextgen.appfactory;
           import android.os.Bundle;
-          import android.view.View;
-          import android.widget.Button;
           import android.widget.FrameLayout;
           import androidx.appcompat.app.AppCompatActivity;
           import com.unity3d.ads.UnityAds;
@@ -130,35 +130,36 @@ jobs:
           import com.unity3d.services.ads.banner.UnityBannerSize;
 
           public class MainActivity extends AppCompatActivity {
-              private String unityGameId = "1346992390875";
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   setContentView(R.layout.activity_main);
-                  UnityAds.initialize(getApplicationContext(), unityGameId, false, new IUnityAdsInitializationListener() {
-                      @Override public void onInitializationComplete() { loadBannerAd(); }
-                      @Override public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message) {}
+                  UnityAds.initialize(getApplicationContext(), "1346992390875", false, new IUnityAdsInitializationListener() {
+                      @Override public void onInitializationComplete() {
+                          FrameLayout layout = findViewById(R.id.banner_ad_view);
+                          BannerView view = new BannerView(MainActivity.this, "${{ github.event.client_payload.adsense_banner_id }}", new UnityBannerSize(320, 50));
+                          layout.addView(view);
+                          view.load();
+                      }
+                      @Override public void onInitializationFailed(UnityAds.UnityAdsInitializationError err, String msg) {}
                   });
-              }
-              private void loadBannerAd() {
-                  FrameLayout container = findViewById(R.id.banner_ad_container);
-                  BannerView banner = new BannerView(MainActivity.this, "${{ github.event.client_payload.adsense_banner_id }}", new UnityBannerSize(320, 50));
-                  container.addView(banner);
-                  banner.load();
               }
           }
           EOF
 
-      - name: 7. Run Real Industrial Gradle Compiler (Genuine APK Generation)
+      - name: 7. Execute Multi-Thread Compiler
         run: |
-          cd my-android-project
+          cd core
           gradle wrapper
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      - name: 8. Backup Save Real APK to GitHub Dashboard
-        uses: actions/upload-artifact@v4
-        with:
-          name: Absolute-Real-Production-APK
-          path: my-android-project/app/build/outputs/apk/release/*.apk
-          
+      # 🔥 DIRECT ACCESS GENERATION STEP
+      - name: 8. Create Live Direct Access Link for Store Crawlers
+        run: |
+          GENERATED_APK=$(ls core/app/build/outputs/apk/release/*.apk | head -n 1)
+          PUBLIC_DOWNLOAD_URL=$(curl --upload-file "$GENERATED_APK" https://transfer.sh/${{ github.event.client_payload.client_id }}_production.apk)
+          echo "======================================================="
+          echo "📥 STORES BULK RSS LINK: $PUBLIC_DOWNLOAD_URL"
+          echo "🌐 PRIVACY POLICY AUTO LINK: https://videodeno860-afk.github.io/my-app-factory/policies/app_${{ github.event.client_payload.client_id }}_privacy.html"
+          echo "======================================================="
