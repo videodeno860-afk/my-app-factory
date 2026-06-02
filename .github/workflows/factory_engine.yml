@@ -22,21 +22,14 @@ jobs:
       - name: 🤖 3. Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 🧠 4. Generate Master Data Feed (Dynamic 10 Lakh Matrix Base)
+      - name: 🧠 4. Clean & Setup Assets
         run: |
           mkdir -p docs/apks docs/policies
-          
-          # Master App Details FIXED
+          rm -rf core
           echo "APP_NAME=Universal Mega App Factory" >> $GITHUB_ENV
-          echo "CLIENT_ID=1000000" >> $GITHUB_ENV
-          echo "PRIMARY_COLOR=#1A237E" >> $GITHUB_ENV
-
-          # Creating the central cloud link for the single APK
-          echo "{\"Client_id\": \"1000000\", \"app_name\": \"Universal Mega App Factory\", \"primary_color\": \"#1A237E\", \"app_status\": \"Live Master Engine\", \"feed_url\": \"https://videodeno860-afk.github.io/my-app-factory/apps_feed.json\"}" > current_app.json
 
       - name: 🏗️ 5. Building Real Android Single Master Source
         run: |
-          rm -rf core
           mkdir -p core/app/src/main/java/com/nextgen/masterfactory
           mkdir -p core/app/src/main/res/layout
           mkdir -p core/app/src/main/res/values
@@ -74,7 +67,7 @@ jobs:
               }
               signingConfigs {
                   release {
-                      storeFile file("master_release.keystore")
+                      storeFile file("final_master.keystore")
                       storePassword "MasterAdmin2026"
                       keyAlias "master_alias"
                       keyPassword "MasterAdmin2026"
@@ -142,7 +135,6 @@ jobs:
                   super.onCreate(savedInstanceState);
                   setContentView(R.layout.activity_main);
                   
-                  // 🔥 Unity Ads Initialization
                   UnityAds.initialize(getApplicationContext(), "1346992390875", false, new IUnityAdsInitializationListener() {
                       @Override 
                       public void onInitializationComplete() {
@@ -157,29 +149,24 @@ jobs:
           }
           EOF
 
-      - name: 🔐 6. Create Master Keystore
+      - name: 🔐 6. Create Fresh Security Keystore
         run: |
-          keytool -genkey -v -keystore core/app/master_release.keystore -alias master_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass "MasterAdmin2026" -keypass "MasterAdmin2026" -dname "CN=MasterFactory, OU=Cloud, O=Engine, L=Agra, S=UP, C=IN"
+          keytool -genkey -v -keystore core/app/final_master.keystore -alias master_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass "MasterAdmin2026" -keypass "MasterAdmin2026" -dname "CN=MasterFactory, OU=Cloud, O=Engine, L=Agra, S=UP, C=IN"
 
       - name: 🚀 7. Compile Single Master APK
         run: |
           cd core
-          gradle wrapper
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon || echo "Bypass..."
+          ./gradlew assembleRelease --no-daemon
           
           cd ..
-          if [ -f "core/app/build/outputs/apk/release/app-release.apk" ]; then
-            cp core/app/build/outputs/apk/release/app-release.apk docs/apks/Master_Factory_App.apk
-          else
-            echo "Master Asset Mapping Locked" > docs/apks/Master_Factory_App.apk
-          fi
+          cp core/app/build/outputs/apk/release/app-release.apk docs/apks/Master_Factory_App.apk
 
       - name: 📤 8. Commit & Push Single Master APK to Cloud
         run: |
           git config --global user.name "NextGen-Automation-Bot"
           git config --global user.email "automation-bot@github.com"
           git add docs/
-          git commit -m "🚀 Single Master APK Live & Ready [skip ci]" || exit 0
+          git commit -m "🚀 Real Master APK Compiled Successfully [skip ci]" || exit 0
           git push origin main
           
