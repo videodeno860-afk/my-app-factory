@@ -22,11 +22,6 @@ jobs:
       - name: 🤖 3. Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 🐘 3.5 Setup Fixed Gradle Environment
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5'
-
       - name: 🧠 4. Safe Clean & Factory Reset
         run: |
           mkdir -p docs/apks docs/policies
@@ -35,19 +30,31 @@ jobs:
           mkdir -p core/app/src/main/res/layout
           mkdir -p core/app/src/main/res/values
 
-      - name: 🗂️ 5. Injecting Protected Project Configs
+      - name: 🗂️ 5. Injecting Independent Project Configs
         run: |
           echo "include ':app'" > core/settings.gradle
           echo "sdk.dir=$ANDROID_HOME" > core/local.properties
 
+          # Top-level build script with explicit repositories for dependencies
           cat << 'EOF' > core/build.gradle
           buildscript {
-              repositories { google(); mavenCentral() }
-              dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.2.2'
+              }
           }
-          allprojects { repositories { google(); mavenCentral() } }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
           EOF
 
+          # App build script with strict standalone configurations
           cat << 'EOF' > core/app/build.gradle
           plugins { id 'com.android.application' }
           android {
@@ -72,6 +79,8 @@ jobs:
                   release {
                       signingConfig signingConfigs.release
                       minifyEnabled false
+                      shrinkResources false
+                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
                   }
               }
           }
@@ -211,20 +220,26 @@ jobs:
         run: |
           keytool -genkey -v -keystore core/app/final_master.keystore -alias master_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass "MasterAdmin2026" -keypass "MasterAdmin2026" -dname "CN=MasterFactory, OU=Cloud, O=Engine, L=Agra, S=UP, C=IN"
 
-      - name: 🚀 7. Compile Single Master APK
+      - name: 🐘 7. Setup Standalone Gradle Wrapper
         run: |
           cd core
-          # Local wrapper fallback injection
-          gradle wrapper --gradle-version 8.5
+          # 🔥 FIX: Downloading explicit local wrapper to eliminate system environment crashes
+          gradle wrapper --gradle-version 8.5 --distribution-type bin
+
+      - name: 🚀 8. Compile Single Master APK
+        run: |
+          cd core
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          # 🔥 BYPASS: Running compile with automatic dependency sync
+          ./gradlew assembleRelease --no-daemon --stacktrace
           cd ..
           cp core/app/build/outputs/apk/release/app-release.apk docs/apks/Master_Factory_App.apk
 
-      - name: 📤 8. Commit & Push Single Master APK to Cloud
+      - name: 📤 9. Commit & Push Single Master APK to Cloud
         run: |
           git config --global user.name "NextGen-Automation-Bot"
           git config --global user.email "automation-bot@github.com"
           git add docs/
           git commit -m "🚀 Automatic Master APK Compiled [skip ci]" || exit 0
           git push origin main
+          
