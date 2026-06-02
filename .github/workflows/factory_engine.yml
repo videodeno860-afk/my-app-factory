@@ -22,8 +22,10 @@ jobs:
       - name: 🤖 3. Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 🐘 3.5 Setup Gradle Environment
+      - name: 🐘 3.5 Setup Fixed Gradle 8.5
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5' # 🔥 FIX: Version fixed so it never uses 9.5+
 
       - name: 🧠 4. Clean & Setup Assets
         run: |
