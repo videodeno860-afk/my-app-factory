@@ -11,16 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 1. Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: ☕ 2. Setup Java JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: 🤖 3. Setup Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: 🐘 3.5 Setup Gradle Environment
+        uses: gradle/actions/setup-gradle@v4
 
       - name: 🧠 4. Clean & Setup Assets
         run: |
@@ -148,7 +151,6 @@ jobs:
                   adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, appList);
                   listView.setAdapter(adapter);
                   
-                  // Modern Executor (Async replacement for Android 14+)
                   ExecutorService executor = Executors.newSingleThreadExecutor();
                   Handler handler = new Handler(Looper.getMainLooper());
                   
@@ -208,12 +210,10 @@ jobs:
         run: |
           keytool -genkey -v -keystore core/app/final_master.keystore -alias master_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass "MasterAdmin2026" -keypass "MasterAdmin2026" -dname "CN=MasterFactory, OU=Cloud, O=Engine, L=Agra, S=UP, C=IN"
 
-      - name: 🚀 7. Setup Gradle and Compile Single Master APK
+      - name: 🚀 7. Compile Single Master APK via Gradle Action
         run: |
           cd core
-          # Smart Fix: Using native gradle command instead of broken wrapper script
           gradle assembleRelease --no-daemon
-          
           cd ..
           cp core/app/build/outputs/apk/release/app-release.apk docs/apks/Master_Factory_App.apk
 
