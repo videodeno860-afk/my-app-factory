@@ -1,4 +1,4 @@
-name: ⚡ COMPLETE FIXED SINGLE MASTER APK ENGINE
+name: ⚡ AUTOMATIC MASTER APK CLOUD ENGINE
 
 on:
   push:
@@ -22,25 +22,24 @@ jobs:
       - name: 🤖 3. Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 🐘 3.5 Setup Fixed Gradle 8.5
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.5' # 🔥 FIX: Version fixed so it never uses 9.5+
-
-      - name: 🧠 4. Clean & Setup Assets
+      - name: 🧠 4. Clean & Automatic Structure Setup
         run: |
           mkdir -p docs/apks docs/policies
           rm -rf core
-          echo "APP_NAME=Universal Mega App Factory" >> $GITHUB_ENV
-
-      - name: 🏗️ 5. Building Real Android Single Master Source
-        run: |
+          # Ekdam fresh automatic standard directory structure banana
           mkdir -p core/app/src/main/java/com/nextgen/masterfactory
           mkdir -p core/app/src/main/res/layout
           mkdir -p core/app/src/main/res/values
 
+      - name: 🗂️ 5. Injecting Fresh Build & Project Files
+        run: |
+          # 1. Project level settings
           echo "include ':app'" > core/settings.gradle
           
+          # 2. Local properties targeting Android SDK automatically
+          echo "sdk.dir=$ANDROID_HOME" > core/local.properties
+
+          # 3. Main Project Build Script
           cat << 'EOF' > core/build.gradle
           buildscript {
               repositories { google(); mavenCentral() }
@@ -49,6 +48,7 @@ jobs:
           allprojects { repositories { google(); mavenCentral() } }
           EOF
 
+          # 4. App Level Build Script
           cat << 'EOF' > core/app/build.gradle
           plugins { id 'com.android.application' }
           android {
@@ -83,6 +83,7 @@ jobs:
           }
           EOF
 
+          # 5. Android Manifest with Internet permissions
           cat << 'EOF' > core/app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.microsoft.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET"/>
@@ -103,6 +104,7 @@ jobs:
           echo '<?xml version="1.0" encoding="utf-8"?><resources><color name="colorPrimary">#1A237E</color></resources>' > core/app/src/main/res/values/colors.xml
           echo '<resources><string name="app_name">Master App Factory</string><style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > core/app/src/main/res/values/strings.xml
           
+          # UI Layout for Matrix List
           cat << 'EOF' > core/app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <RelativeLayout xmlns:android="http://schemas.microsoft.com/apk/res/android"
@@ -116,6 +118,7 @@ jobs:
           </RelativeLayout>
           EOF
 
+          # Java Code for Cloud Connection & Unity Ads
           cat << 'EOF' > core/app/src/main/java/com/nextgen/masterfactory/MainActivity.java
           package com.nextgen.masterfactory;
           import android.os.Bundle;
@@ -212,18 +215,24 @@ jobs:
         run: |
           keytool -genkey -v -keystore core/app/final_master.keystore -alias master_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass "MasterAdmin2026" -keypass "MasterAdmin2026" -dname "CN=MasterFactory, OU=Cloud, O=Engine, L=Agra, S=UP, C=IN"
 
-      - name: 🚀 7. Compile Single Master APK via Gradle Action
+      - name: 🐘 7. Setup Native Gradle Wrapper
         run: |
           cd core
-          gradle assembleRelease --no-daemon
+          # Yeh script bina system command ke automatic standalone gradle structures embed kar degi
+          gradle wrapper --gradle-version 8.5 --distribution-type bin
+
+      - name: 🚀 8. Compile Single Master APK
+        run: |
+          cd core
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
           cd ..
           cp core/app/build/outputs/apk/release/app-release.apk docs/apks/Master_Factory_App.apk
 
-      - name: 📤 8. Commit & Push Single Master APK to Cloud
+      - name: 📤 9. Commit & Push Single Master APK to Cloud
         run: |
           git config --global user.name "NextGen-Automation-Bot"
           git config --global user.email "automation-bot@github.com"
           git add docs/
-          git commit -m "🚀 Real Fixed Master APK Live [skip ci]" || exit 0
+          git commit -m "🚀 Automatic Master APK Compiled [skip ci]" || exit 0
           git push origin main
-          
