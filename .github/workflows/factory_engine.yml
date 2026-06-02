@@ -1,4 +1,4 @@
-name: ⚡ REAL SINGLE MASTER APK CLOUD ENGINE
+name: ⚡ COMPLETE FIXED SINGLE MASTER APK ENGINE
 
 on:
   push:
@@ -33,7 +33,6 @@ jobs:
           mkdir -p core/app/src/main/java/com/nextgen/masterfactory
           mkdir -p core/app/src/main/res/layout
           mkdir -p core/app/src/main/res/values
-          mkdir -p core/gradle/wrapper
 
           echo "include ':app'" > core/settings.gradle
           
@@ -43,14 +42,6 @@ jobs:
               dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
           }
           allprojects { repositories { google(); mavenCentral() } }
-          EOF
-
-          cat << 'EOF' > core/gradle/wrapper/gradle-wrapper.properties
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
           EOF
 
           cat << 'EOF' > core/app/build.gradle
@@ -91,7 +82,9 @@ jobs:
           <manifest xmlns:android="http://schemas.microsoft.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET"/>
               <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-              <application android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+              <application 
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+                  android:usesCleartextTraffic="true">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -105,7 +98,6 @@ jobs:
           echo '<?xml version="1.0" encoding="utf-8"?><resources><color name="colorPrimary">#1A237E</color></resources>' > core/app/src/main/res/values/colors.xml
           echo '<resources><string name="app_name">Master App Factory</string><style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > core/app/src/main/res/values/strings.xml
           
-          # Dynamic Layout with List for 10 Lakh Apps Data
           cat << 'EOF' > core/app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <RelativeLayout xmlns:android="http://schemas.microsoft.com/apk/res/android"
@@ -119,11 +111,11 @@ jobs:
           </RelativeLayout>
           EOF
 
-          # Final Core Java Connection (Fetches from apps_feed.json & Displays Ads)
           cat << 'EOF' > core/app/src/main/java/com/nextgen/masterfactory/MainActivity.java
           package com.nextgen.masterfactory;
           import android.os.Bundle;
-          import android.os.AsyncTask;
+          import android.os.Handler;
+          import android.os.Looper;
           import android.widget.ArrayAdapter;
           import android.widget.ListView;
           import android.widget.FrameLayout;
@@ -138,6 +130,8 @@ jobs:
           import java.io.InputStreamReader;
           import java.net.URL;
           import java.util.ArrayList;
+          import java.util.concurrent.ExecutorService;
+          import java.util.concurrent.Executors;
 
           public class MainActivity extends AppCompatActivity {
               private BannerView topBannerView;
@@ -154,10 +148,48 @@ jobs:
                   adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, appList);
                   listView.setAdapter(adapter);
                   
-                  // 1. Load 10 Lakh Matrix Data from Cloud Feed
-                  new FetchCloudData().execute("https://videodeno860-afk.github.io/my-app-factory/apps_feed.json");
+                  // Modern Executor (Async replacement for Android 14+)
+                  ExecutorService executor = Executors.newSingleThreadExecutor();
+                  Handler handler = new Handler(Looper.getMainLooper());
                   
-                  // 2. Load Real Unity Ads
+                  executor.execute(() -> {
+                      String result = null;
+                      try {
+                          URL url = new URL("https://videodeno860-afk.github.io/my-app-factory/apps_feed.json");
+                          BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+                          StringBuilder sb = new StringBuilder();
+                          String line;
+                          while ((line = reader.readLine()) != null) sb.append(line);
+                          reader.close();
+                          result = sb.toString();
+                      } catch (Exception e) { e.printStackTrace(); }
+                      
+                      final String finalResult = result;
+                      handler.post(() -> {
+                          if (finalResult != null) {
+                              try {
+                                  if(finalResult.trim().startsWith("[")) {
+                                      JSONArray array = new JSONArray(finalResult);
+                                      for (int i = 0; i < array.length(); i++) {
+                                          JSONObject obj = array.getJSONObject(i);
+                                          appList.add("🚀 " + obj.optString("app_name", "New App"));
+                                      }
+                                  } else {
+                                      JSONObject obj = new JSONObject(finalResult);
+                                      appList.add("🚀 " + obj.optString("app_name", "Master Live App"));
+                                  }
+                                  adapter.notifyDataSetChanged();
+                              } catch (Exception e) {
+                                  appList.add("⚡ Factory Sync Active");
+                                  adapter.notifyDataSetChanged();
+                              }
+                          } else {
+                              appList.add("⚡ Connected to App Matrix");
+                              adapter.notifyDataSetChanged();
+                          }
+                      });
+                  });
+                  
                   UnityAds.initialize(getApplicationContext(), "1346992390875", false, new IUnityAdsInitializationListener() {
                       @Override 
                       public void onInitializationComplete() {
@@ -169,43 +201,6 @@ jobs:
                       @Override public void onInitializationFailed(UnityAds.UnityAdsInitializationError err, String msg) {}
                   });
               }
-
-              private class FetchCloudData extends AsyncTask<String, Void, String> {
-                  @Override
-                  protected String doInBackground(String... urls) {
-                      try {
-                          URL url = new URL(urls[0]);
-                          BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-                          StringBuilder sb = new StringBuilder();
-                          String line;
-                          while ((line = reader.readLine()) != null) sb.append(line);
-                          reader.close();
-                          return sb.toString();
-                      } catch (Exception e) { return null; }
-                  }
-                  @Override
-                  protected void onPostExecute(String result) {
-                      if (result != null) {
-                          try {
-                              // If data is single object or array, parse and display
-                              if(result.trim().startsWith("[")) {
-                                  JSONArray array = new JSONArray(result);
-                                  for (int i = 0; i < array.length(); i++) {
-                                      JSONObject obj = array.getJSONObject(i);
-                                      appList.add("🚀 " + obj.optString("app_name", "New App"));
-                                  }
-                              } else {
-                                  JSONObject obj = new JSONObject(result);
-                                  appList.add("🚀 " + obj.optString("app_name", "Master Live App"));
-                              }
-                              adapter.notifyDataSetChanged();
-                          } catch (Exception e) {
-                              appList.add("⚡ Factory Sync Active");
-                              adapter.notifyDataSetChanged();
-                          }
-                      }
-                  }
-              }
           }
           EOF
 
@@ -213,12 +208,11 @@ jobs:
         run: |
           keytool -genkey -v -keystore core/app/final_master.keystore -alias master_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass "MasterAdmin2026" -keypass "MasterAdmin2026" -dname "CN=MasterFactory, OU=Cloud, O=Engine, L=Agra, S=UP, C=IN"
 
-      - name: 🚀 7. Compile Single Master APK
+      - name: 🚀 7. Setup Gradle and Compile Single Master APK
         run: |
           cd core
-          gradle wrapper --gradle-version 8.5
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          # Smart Fix: Using native gradle command instead of broken wrapper script
+          gradle assembleRelease --no-daemon
           
           cd ..
           cp core/app/build/outputs/apk/release/app-release.apk docs/apks/Master_Factory_App.apk
@@ -228,6 +222,6 @@ jobs:
           git config --global user.name "NextGen-Automation-Bot"
           git config --global user.email "automation-bot@github.com"
           git add docs/
-          git commit -m "🚀 Complete Master Cloud APK Live [skip ci]" || exit 0
+          git commit -m "🚀 Real Fixed Master APK Live [skip ci]" || exit 0
           git push origin main
           
