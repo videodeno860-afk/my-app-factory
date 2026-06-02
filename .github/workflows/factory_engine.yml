@@ -105,36 +105,59 @@ jobs:
           echo '<?xml version="1.0" encoding="utf-8"?><resources><color name="colorPrimary">#1A237E</color></resources>' > core/app/src/main/res/values/colors.xml
           echo '<resources><string name="app_name">Master App Factory</string><style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > core/app/src/main/res/values/strings.xml
           
+          # Dynamic Layout with List for 10 Lakh Apps Data
           cat << 'EOF' > core/app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <RelativeLayout xmlns:android="http://schemas.microsoft.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="@color/colorPrimary"
-              android:padding="16dp">
-              <TextView android:id="@+id/app_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🌐 MASTER ENGINE RUNNING" android:textSize="22sp" android:layout_centerInParent="true" android:textColor="#FFFFFF"/>
+              android:background="#F5F5F5"
+              android:padding="8dp">
+              <TextView android:id="@+id/app_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="🌐 MEGA APP FACTORY LIVE" android:textSize="20sp" android:textStyle="bold" android:gravity="center" android:padding="12dp" android:textColor="#1A237E"/>
+              <ListView android:id="@+id/apps_listview" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/banner_ad_view" android:layout_below="@id/app_title" android:divider="#CCCCCC" android:dividerHeight="1dp"/>
               <FrameLayout android:id="@+id/banner_ad_view" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" />
           </RelativeLayout>
           EOF
 
+          # Final Core Java Connection (Fetches from apps_feed.json & Displays Ads)
           cat << 'EOF' > core/app/src/main/java/com/nextgen/masterfactory/MainActivity.java
           package com.nextgen.masterfactory;
           import android.os.Bundle;
+          import android.os.AsyncTask;
+          import android.widget.ArrayAdapter;
+          import android.widget.ListView;
           import android.widget.FrameLayout;
           import androidx.appcompat.app.AppCompatActivity;
           import com.unity3d.ads.UnityAds;
           import com.unity3d.ads.IUnityAdsInitializationListener;
           import com.unity3d.services.ads.banner.BannerView;
           import com.unity3d.services.ads.banner.UnityBannerSize;
+          import org.json.JSONArray;
+          import org.json.JSONObject;
+          import java.io.BufferedReader;
+          import java.io.InputStreamReader;
+          import java.net.URL;
+          import java.util.ArrayList;
 
           public class MainActivity extends AppCompatActivity {
               private BannerView topBannerView;
+              private ListView listView;
+              private ArrayList<String> appList = new ArrayList<>();
+              private ArrayAdapter<String> adapter;
               
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   setContentView(R.layout.activity_main);
                   
+                  listView = findViewById(R.id.apps_listview);
+                  adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, appList);
+                  listView.setAdapter(adapter);
+                  
+                  // 1. Load 10 Lakh Matrix Data from Cloud Feed
+                  new FetchCloudData().execute("https://videodeno860-afk.github.io/my-app-factory/apps_feed.json");
+                  
+                  // 2. Load Real Unity Ads
                   UnityAds.initialize(getApplicationContext(), "1346992390875", false, new IUnityAdsInitializationListener() {
                       @Override 
                       public void onInitializationComplete() {
@@ -146,6 +169,43 @@ jobs:
                       @Override public void onInitializationFailed(UnityAds.UnityAdsInitializationError err, String msg) {}
                   });
               }
+
+              private class FetchCloudData extends AsyncTask<String, Void, String> {
+                  @Override
+                  protected String doInBackground(String... urls) {
+                      try {
+                          URL url = new URL(urls[0]);
+                          BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+                          StringBuilder sb = new StringBuilder();
+                          String line;
+                          while ((line = reader.readLine()) != null) sb.append(line);
+                          reader.close();
+                          return sb.toString();
+                      } catch (Exception e) { return null; }
+                  }
+                  @Override
+                  protected void onPostExecute(String result) {
+                      if (result != null) {
+                          try {
+                              // If data is single object or array, parse and display
+                              if(result.trim().startsWith("[")) {
+                                  JSONArray array = new JSONArray(result);
+                                  for (int i = 0; i < array.length(); i++) {
+                                      JSONObject obj = array.getJSONObject(i);
+                                      appList.add("🚀 " + obj.optString("app_name", "New App"));
+                                  }
+                              } else {
+                                  JSONObject obj = new JSONObject(result);
+                                  appList.add("🚀 " + obj.optString("app_name", "Master Live App"));
+                              }
+                              adapter.notifyDataSetChanged();
+                          } catch (Exception e) {
+                              appList.add("⚡ Factory Sync Active");
+                              adapter.notifyDataSetChanged();
+                          }
+                      }
+                  }
+              }
           }
           EOF
 
@@ -156,6 +216,7 @@ jobs:
       - name: 🚀 7. Compile Single Master APK
         run: |
           cd core
+          gradle wrapper --gradle-version 8.5
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
           
@@ -167,6 +228,6 @@ jobs:
           git config --global user.name "NextGen-Automation-Bot"
           git config --global user.email "automation-bot@github.com"
           git add docs/
-          git commit -m "🚀 Real Master APK Compiled Successfully [skip ci]" || exit 0
+          git commit -m "🚀 Complete Master Cloud APK Live [skip ci]" || exit 0
           git push origin main
           
