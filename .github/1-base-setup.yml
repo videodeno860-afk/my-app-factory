@@ -1,0 +1,47 @@
+name: 🧱 STEP 1: FACTORY ARCHITECTURE MAKER
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  create_base_structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🧠 2. Generate Clean Android Folders
+        run: |
+          mkdir -p docs/apks docs/policies
+          rm -rf app build.gradle settings.gradle
+          
+          # Creating Folder Structure for Master APK Data
+          mkdir -p app/src/main/java/com/nextgen/masterfactory
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+          echo "Base Android directories initialized for Mega Data Model."
+
+      - name: 📝 3. Create Root Configuration Files
+        run: |
+          echo "include ':app'" > settings.gradle
+          
+          cat << 'EOF' > build.gradle
+          buildscript {
+              repositories { google(); mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
+          }
+          allprojects { repositories { google(); mavenCentral() } }
+          EOF
+          echo "Root Gradle config files written successfully."
+
+      - name: 📤 4. Save Changes to Cloud
+        run: |
+          git config --global user.name "NextGen-Automation-Bot"
+          git config --global user.email "automation-bot@github.com"
+          git add .
+          git commit -m "🧱 Step 1: Base Android Structure Ready [skip ci]" || exit 0
+          git push origin main
+          
