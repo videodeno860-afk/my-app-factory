@@ -1,0 +1,61 @@
+name: ⚡ AUTOMATIC BASE INFRASTRUCTURE INJECTOR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  inject_genuine_android_framework:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🧠 2. Generate Real Android Directories
+        run: |
+          rm -rf app build.gradle settings.gradle gradlew gradle docs/apks/Master_Factory_App.apk
+          mkdir -p app/src/main/java/com/nextgen/masterfactory
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+          echo "Directories created successfully."
+
+      - name: 📝 3. Write Root Configuration Scripts
+        run: |
+          echo "include ':app'" > settings.gradle
+          
+          cat << 'EOF' > build.gradle
+          buildscript {
+              repositories { google(); mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
+          }
+          allprojects { repositories { google(); mavenCentral() } }
+          EOF
+
+      - name: 📝 4. Write App Manifest & Placeholder Layout
+        run: |
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <manifest xmlns:android="http://schemas.microsoft.com/apk/res/android">
+              <application android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          echo '<resources><string name="app_name">Master Factory App</string><style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > app/src/main/res/values/strings.xml
+
+      - name: 📤 5. Direct Hard-Push to Repository Main Branch
+        run: |
+          git config --global user.name "NextGen-Automation-Bot"
+          git config --global user.email "automation-bot@github.com"
+          git add .
+          git commit -m "🧱 Core Android Base Structure Saved Successfully [skip ci]" || exit 0
+          
+          # Genuine details injected directly by your brother:
+          git push --force https://videodeno860-afk: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@github.com/videodeno860-afk/my-app-factory.git main
