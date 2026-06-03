@@ -1,4 +1,4 @@
-name: ⚡ NEXT-GEN AUTOMATIC APK FACTORY
+name: ⚡ AUTOMATIC BASE INFRASTRUCTURE INJECTOR
 
 on:
   push:
@@ -7,30 +7,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  compile_factory_app:
+  inject_genuine_android_framework:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 1. Checkout Live Repository
+      - name: 📥 1. Checkout Repository
         uses: actions/checkout@v4
 
-      - name: ☕ 2. Setup Java JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: 🤖 3. Setup Android SDK Environment
-        uses: android-actions/setup-android@v3
-
-      - name: 🧠 4. Automatic Framework Generation
+      - name: 🧠 2. Generate Real Android Directories
         run: |
-          mkdir -p docs/apks docs/policies
-          rm -rf app build.gradle settings.gradle gradlew gradle
-          
-          # Injecting Base Settings
+          rm -rf app build.gradle settings.gradle gradlew gradle docs/apks/Master_Factory_App.apk
+          mkdir -p app/src/main/java/com/nextgen/masterfactory
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+          echo "Directories created successfully."
+
+      - name: 📝 3. Write Root Configuration Scripts
+        run: |
           echo "include ':app'" > settings.gradle
           
-          # Injecting Root Build Script
           cat << 'EOF' > build.gradle
           buildscript {
               repositories { google(); mavenCentral() }
@@ -39,54 +33,11 @@ jobs:
           allprojects { repositories { google(); mavenCentral() } }
           EOF
 
-          # Creating App Structure
-          mkdir -p app/src/main/java/com/nextgen/masterfactory
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/values
-
-          # Injecting App Level Build Config
-          cat << 'EOF' > app/build.gradle
-          plugins { id 'com.android.application' }
-          android {
-              namespace 'com.nextgen.masterfactory'
-              compileSdk 34
-              defaultConfig {
-                  applicationId "com.factory.single_master_engine"
-                  minSdk 24
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0.0"
-              }
-              signingConfigs {
-                  release {
-                      storeFile file("final_master.keystore")
-                      storePassword "MasterAdmin2026"
-                      keyAlias "master_alias"
-                      keyPassword "MasterAdmin2026"
-                  }
-              }
-              buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                      minifyEnabled false
-                  }
-              }
-          }
-          dependencies {
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'com.google.android.material:material:1.9.0'
-              implementation 'com.unity3d.ads:unity-ads:4.9.2'
-          }
-          EOF
-
-          # Injecting Android Manifest
+      - name: 📝 4. Write App Manifest & Placeholder Layout
+        run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.microsoft.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET"/>
-              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-              <application 
-                  android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-                  android:usesCleartextTraffic="true">
+              <application android:theme="@style/Theme.AppCompat.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -97,139 +48,16 @@ jobs:
           </manifest>
           EOF
 
-          # Injecting App Resources
-          echo '<?xml version="1.0" encoding="utf-8"?><resources><color name="colorPrimary">#1A237E</color></resources>' > app/src/main/res/values/colors.xml
-          echo '<resources><string name="app_name">Master App Factory</string><style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > app/src/main/res/values/strings.xml
-          
-          # Injecting App Layout UI
-          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <RelativeLayout xmlns:android="http://schemas.microsoft.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="#F5F5F5"
-              android:padding="8dp">
-              <TextView android:id="@+id/app_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="🌐 MEGA APP FACTORY LIVE" android:textSize="20sp" android:textStyle="bold" android:gravity="center" android:padding="12dp" android:textColor="#1A237E"/>
-              <ListView android:id="@+id/apps_listview" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/banner_ad_view" android:layout_below="@id/app_title" android:divider="#CCCCCC" android:dividerHeight="1dp"/>
-              <FrameLayout android:id="@+id/banner_ad_view" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" />
-          </RelativeLayout>
-          EOF
+          echo '<resources><string name="app_name">Master Factory App</string><style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar"/></resources>' > app/src/main/res/values/strings.xml
 
-          # Injecting Java Source Code with Unity Ads Integration
-          cat << 'EOF' > app/src/main/java/com/nextgen/masterfactory/MainActivity.java
-          package com.nextgen.masterfactory;
-          import android.os.Bundle;
-          import android.os.Handler;
-          import android.os.Looper;
-          import android.widget.ArrayAdapter;
-          import android.widget.ListView;
-          import android.widget.FrameLayout;
-          import androidx.appcompat.app.AppCompatActivity;
-          import com.unity3d.ads.UnityAds;
-          import com.unity3d.ads.IUnityAdsInitializationListener;
-          import com.unity3d.services.ads.banner.BannerView;
-          import com.unity3d.services.ads.banner.UnityBannerSize;
-          import org.json.JSONArray;
-          import org.json.JSONObject;
-          import java.io.BufferedReader;
-          import java.io.InputStreamReader;
-          import java.net.URL;
-          import java.util.ArrayList;
-          import java.util.concurrent.ExecutorService;
-          import java.util.concurrent.Executors;
-
-          public class MainActivity extends AppCompatActivity {
-              private BannerView topBannerView;
-              private ListView listView;
-              private ArrayList<String> appList = new ArrayList<>();
-              private ArrayAdapter<String> adapter;
-              
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
-                  setContentView(R.layout.activity_main);
-                  
-                  listView = findViewById(R.id.apps_listview);
-                  adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, appList);
-                  listView.setAdapter(adapter);
-                  
-                  ExecutorService executor = Executors.newSingleThreadExecutor();
-                  Handler handler = new Handler(Looper.getMainLooper());
-                  
-                  executor.execute(() -> {
-                      String result = null;
-                      try {
-                          URL url = new URL("https://videodeno860-afk.github.io/my-app-factory/apps_feed.json");
-                          BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-                          StringBuilder sb = new StringBuilder();
-                          String line;
-                          while ((line = reader.readLine()) != null) sb.append(line);
-                          reader.close();
-                          result = sb.toString();
-                      } catch (Exception e) { e.printStackTrace(); }
-                      
-                      final String finalResult = result;
-                      handler.post(() -> {
-                          if (finalResult != null) {
-                              try {
-                                  if(finalResult.trim().startsWith("[")) {
-                                      JSONArray array = new JSONArray(finalResult);
-                                      for (int i = 0; i < array.length(); i++) {
-                                          JSONObject obj = array.getJSONObject(i);
-                                          appList.add("🚀 " + obj.optString("app_name", "New App"));
-                                      }
-                                  } else {
-                                      JSONObject obj = new JSONObject(finalResult);
-                                      appList.add("🚀 " + obj.optString("app_name", "Master Live App"));
-                                  }
-                                  adapter.notifyDataSetChanged();
-                              } catch (Exception e) {
-                                  appList.add("⚡ Factory Sync Active");
-                                  adapter.notifyDataSetChanged();
-                              }
-                          } else {
-                              appList.add("⚡ Connected to App Matrix");
-                              adapter.notifyDataSetChanged();
-                          }
-                      });
-                  });
-                  
-                  UnityAds.initialize(getApplicationContext(), "1346992390875", false, new IUnityAdsInitializationListener() {
-                      @Override 
-                      public void onInitializationComplete() {
-                          FrameLayout layout = findViewById(R.id.banner_ad_view);
-                          topBannerView = new BannerView(MainActivity.this, "Banner_Android", new UnityBannerSize(320, 50));
-                          layout.addView(topBannerView);
-                          topBannerView.load();
-                      }
-                      @Override public void onInitializationFailed(UnityAds.UnityAdsInitializationError err, String msg) {}
-                  });
-              }
-          }
-          EOF
-
-      - name: 🔐 5. Generate Keystore Security Signature
-        run: |
-          keytool -genkey -v -keystore app/final_master.keystore -alias master_alias -keyalg RSA -keysize 2048 -validity 10000 -storepass "MasterAdmin2026" -keypass "MasterAdmin2026" -dname "CN=MasterFactory, OU=Cloud, O=Engine, L=Agra, S=UP, C=IN"
-
-      - name: 🐘 6. Setup Local Gradle Wrapper System
-        run: |
-          gradle wrapper --gradle-version 8.5 --distribution-type bin
-
-      - name: 🚀 7. Execute Ultimate Safe APK Compile
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
-
-      - name: 📦 8. Export Finished Master APK to Live Docs
-        run: |
-          cp app/build/outputs/apk/release/app-release.apk docs/apks/Master_Factory_App.apk
-
-      - name: 📤 9. Deploy & Push Directly to Cloud
+      - name: 📤 5. Direct Hard-Push to Repository Main Branch
+        env:
+          SECURE_TOKEN: ${{ secrets.MY_FACTORY_TOKEN }}
         run: |
           git config --global user.name "NextGen-Automation-Bot"
           git config --global user.email "automation-bot@github.com"
-          git add docs/
-          git commit -m "🔥 Live Unity Ads APK Generated Successfully [skip ci]" || exit 0
-          git push origin main
+          git add .
+          git commit -m "🧱 Core Android Base Structure Saved Successfully [skip ci]" || exit 0
           
+          # Secured connection using GitHub Secrets Matrix
+          git push --force https://videodeno860-afk:$SECURE_TOKEN@github.com/videodeno860-afk/my-app-factory.git main
